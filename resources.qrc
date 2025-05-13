@@ -1,8 +1,0 @@
-<!DOCTYPE RCC>
-<RCC version="1.0">
-  <qresource prefix="/">
-    <file>ressources/map.html</file>
-    <file>ressources/trajet.geojson</file>
-  </qresource>
-</RCC>
-
