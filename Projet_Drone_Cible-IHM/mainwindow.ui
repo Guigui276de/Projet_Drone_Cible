@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1214</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="4" column="2">
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QSlider" name="horizontalSlider">
+        <property name="orientation">
+         <enum>Qt::Orientation::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="5" column="2">
+     <widget class="QPushButton" name="pb_mode_manuel">
+      <property name="text">
+       <string>mode manuel</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QLabel" name="label_Attaque">
+      <property name="text">
+       <string>Attaque Mode</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="3">
+     <widget class="QTextEdit" name="tb_transmet"/>
+    </item>
+    <item row="3" column="0">
+     <widget class="QPushButton" name="pb_Straight_Line">
+      <property name="text">
+       <string>Ligne droite</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="2">
+     <layout class="QGridLayout" name="layout_cam"/>
+    </item>
+    <item row="4" column="0">
+     <widget class="QPushButton" name="pb_Zig_Zag">
+      <property name="text">
+       <string>Serpentin</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="2">
+     <widget class="QLCDNumber" name="lcd_speed_num"/>
+    </item>
+    <item row="2" column="2">
+     <widget class="QPushButton" name="pb_Urgence_Stop">
+      <property name="text">
+       <string>Arrêt d'urgence</string>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0" colspan="2">
+     <layout class="QHBoxLayout" name="layout_gps"/>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1214</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menumode">
+    <property name="title">
+     <string>mode </string>
+    </property>
+    <addaction name="actionmode_autonome"/>
+    <addaction name="actionmode_leure"/>
+    <addaction name="actionmode_attaque"/>
+   </widget>
+   <widget class="QMenu" name="menulogs">
+    <property name="title">
+     <string>logs</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuimporter_maps">
+    <property name="title">
+     <string>importer maps</string>
+    </property>
+   </widget>
+   <addaction name="menumode"/>
+   <addaction name="menulogs"/>
+   <addaction name="menuimporter_maps"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionMode_Manuel">
+   <property name="text">
+    <string>Mode Manuel</string>
+   </property>
+  </action>
+  <action name="actionMode_Leurre">
+   <property name="text">
+    <string>Mode Leurre</string>
+   </property>
+  </action>
+  <action name="actionMode_Attaque">
+   <property name="text">
+    <string>Mode Attaque</string>
+   </property>
+  </action>
+  <action name="actionAfficher_Logs">
+   <property name="text">
+    <string>Afficher Logs</string>
+   </property>
+  </action>
+  <action name="actionImporter_Map">
+   <property name="text">
+    <string>Importer Map</string>
+   </property>
+  </action>
+  <action name="actionmode_autonome">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>mode_autonome</string>
+   </property>
+  </action>
+  <action name="actionmode_leure">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>mode_leure</string>
+   </property>
+  </action>
+  <action name="actionmode_attaque">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>mode_attaque</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

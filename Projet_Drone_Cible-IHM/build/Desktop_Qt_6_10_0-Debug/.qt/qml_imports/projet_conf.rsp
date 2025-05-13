@@ -1,0 +1,9 @@
+-rootPath
+/home/guillian/projet2
+-cmake-output
+-output-file
+/home/guillian/projet2/build/Desktop_Qt_6_10_0-Debug/.qt/qml_imports/projet_conf.cmake
+-importPath
+/home/guillian/projet2/build/Desktop_Qt_6_10_0-Debug
+-importPath
+/home/guillian/Qt/6.10.0/gcc_64/qml
