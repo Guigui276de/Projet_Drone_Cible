@@ -1,0 +1,29 @@
+#ifndef SERIAL_READER_HPP
+#define SERIAL_READER_HPP
+
+#include <rclcpp/rclcpp.hpp>
+#include <boost/asio.hpp>
+#include <regex>
+#include <sstream>
+#include "geometry_msgs/msg/twist.hpp"
+
+class SerialReader : public rclcpp::Node {
+public:
+    SerialReader();
+    void read_loop();
+private:
+
+    std::string read_serial();
+    std::string clean_data(const std::string &data);	
+    std::string hex_to_utf8(const std::string &hex);
+    void extract_and_publish(const std::string &utf8_data);
+    boost::asio::io_service io_service_;
+    boost::asio::serial_port serial_;
+    std::chrono::steady_clock::time_point last_received_;
+    int frame_counter_ = 0;
+    bool stopped_;
+    std::string saved_frame_;
+    rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr twist_publisher_;
+};
+
+#endif // SERIAL_READER_HPP
