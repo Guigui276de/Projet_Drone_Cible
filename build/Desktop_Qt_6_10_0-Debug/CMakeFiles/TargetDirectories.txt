@@ -1,0 +1,10 @@
+/home/guillian/projet2/build/Desktop_Qt_6_10_0-Debug/CMakeFiles/projet.dir
+/home/guillian/projet2/build/Desktop_Qt_6_10_0-Debug/CMakeFiles/projet_qmlimportscan.dir
+/home/guillian/projet2/build/Desktop_Qt_6_10_0-Debug/CMakeFiles/edit_cache.dir
+/home/guillian/projet2/build/Desktop_Qt_6_10_0-Debug/CMakeFiles/rebuild_cache.dir
+/home/guillian/projet2/build/Desktop_Qt_6_10_0-Debug/CMakeFiles/list_install_components.dir
+/home/guillian/projet2/build/Desktop_Qt_6_10_0-Debug/CMakeFiles/install.dir
+/home/guillian/projet2/build/Desktop_Qt_6_10_0-Debug/CMakeFiles/install/local.dir
+/home/guillian/projet2/build/Desktop_Qt_6_10_0-Debug/CMakeFiles/install/strip.dir
+/home/guillian/projet2/build/Desktop_Qt_6_10_0-Debug/CMakeFiles/projet_autogen_timestamp_deps.dir
+/home/guillian/projet2/build/Desktop_Qt_6_10_0-Debug/CMakeFiles/projet_autogen.dir
