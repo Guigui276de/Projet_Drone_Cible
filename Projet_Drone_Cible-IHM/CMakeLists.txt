@@ -31,7 +31,6 @@ qt_add_executable(projet
 # Inclure les répertoires nécessaires
 include_directories(${CMAKE_SOURCE_DIR}/external)
 include_directories(${SDL2_INCLUDE_DIRS})
-
 # Lier les bibliothèques
 target_link_libraries(projet
     PRIVATE

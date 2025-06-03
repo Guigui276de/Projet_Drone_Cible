@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Carte GPS</title>
-  <!-- Inclusion du CSS de Leaflet -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  
+  <link rel="stylesheet" href="leaflet.css" />
+
   <style>
     html, body {
       margin: 0;
@@ -20,61 +19,97 @@
   </style>
 </head>
 <body>
+
   <div id="map"></div>
-  
-  <!-- Inclusion de la bibliothèque Leaflet -->
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <script src="leaflet.js"></script>
   <script>
-    // Initialisation de la carte centrée sur Paris par défaut
-    var L = window.L;
-    var map = L.map('map').setView([48.8566, 2.3522], 13);
-    
-    // Exemple : Déplacer le marqueur après 3 secondes
-    setTimeout(() => {
-        updateMarker(48.8584, 2.2945); // Déplacement vers la Tour Eiffel
-    }, 3000);
-    // Ajout de la couche de tuiles OpenStreetMap
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    // Initialisation de la carte centrée sur Brest
+    const map = L.map('map').setView([48.400002, -4.48333], 13);
+
+    // Calque par défaut : OpenStreetMap en ligne
+    let currentLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
-    
-    // Ajout d'un marqueur par défaut (facultatif)
-    var marker = L.marker([48.8566, 2.3522]).addTo(map);
-    
-    // Fonction globale pour mettre à jour le marqueur (si nécessaire)
-   function updateMarker(lat, lon) {
-    if (typeof marker !== 'undefined') {
-        marker.setLatLng([lat, lon]);
-        map.setView([lat, lon], 13);
-    } else {
-        console.error("Le marqueur n'est pas encore initialisé !");
-    }
-}
 
-    
-    // Charger le fichier GeoJSON du trajet depuis les ressources (qrc)
-    fetch('qrc:/trajet.geojson')
-      .then(function(response) {
-        if (!response.ok) {
-          throw new Error("Erreur lors du chargement du fichier GeoJSON");
+    // Conteneur pour les tuiles locales
+    let localTiles = {};
+
+    // Charger les tuiles locales depuis Qt
+    function loadLocalTiles(files) {
+      localTiles = {};
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const path = file.webkitRelativePath;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          localTiles[path] = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+
+      setTimeout(() => {
+        // Supprimer le calque en ligne s'il est présent
+        if (map.hasLayer(currentLayer)) {
+          map.removeLayer(currentLayer);
         }
-        return response.json();
-      })
-      .then(function(geojsonData) {
-        // Ajouter le trajet à la carte via une couche GeoJSON
-        var geojsonLayer = L.geoJSON(geojsonData, {
-          style: {
-            color: 'blue',
-            weight: 4,
-            opacity: 0.7
-          }
-        }).addTo(map);
-        // Ajuster la vue pour englober l'ensemble du trajet
-        map.fitBounds(geojsonLayer.getBounds());
-      })
-      .catch(function(error) {
-        console.error("Erreur lors du chargement du trajet GeoJSON:", error);
-      });
+
+        // Créer un calque de tuiles locales avec fallback en ligne
+        const localTileLayer = L.tileLayer('', {
+          getTileUrl: function(coords) {
+            let path = coords.z + '/' + coords.x + '/' + coords.y + '.png';
+            if (localTiles[path]) {
+              console.log("Chargement tuile locale : " + path);
+              return localTiles[path];
+            } else {
+              console.warn("Tuile locale manquante : " + path + " -> Tuile grise");
+              return paintGris();
+            }
+          },
+          attribution: 'Tuiles locales ou &copy; OpenStreetMap'
+        });
+
+        // Ajouter le calque local à la carte
+        localTileLayer.addTo(map);
+        currentLayer = localTileLayer;
+      }, 1000);
+    }
+
+    // Génère une tuile grise pour indiquer l'absence de tuile
+    function paintGris() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 256;
+      canvas.height = 256;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#cccccc';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#000000';
+      ctx.font = '20px Arial';
+      ctx.fillText('Tuile manquante', 50, 128);
+      return canvas.toDataURL();
+    }
+
+    // Chargement GeoJSON local (depuis Qt)
+    function loadGeoJSONFile(file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const geojson = JSON.parse(e.target.result);
+          const layer = L.geoJSON(geojson, {
+            style: {
+              color: 'green',
+              weight: 2,
+              opacity: 0.8
+            }
+          }).addTo(map);
+          map.fitBounds(layer.getBounds());
+        } catch (err) {
+          console.error("Fichier GeoJSON invalide :", err);
+        }
+      };
+      reader.readAsText(file);
+    }
   </script>
 </body>
 </html>

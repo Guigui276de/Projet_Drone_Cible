@@ -13,15 +13,46 @@
 #include <QDir>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QStackedWidget>
+#include <QScreen>
+
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), controller(nullptr), ui(new Ui::MainWindow)
 {
+
     ui->setupUi(this);
     setWindowTitle("Drone cible");
     AffichageCAM();
     AffichageGPS();
     ComLora();
-    //WatchDog();
+    WatchDog();
+    // Optionnel : forcer une taille initiale (sinon taille par défaut du designer)
+    // resize(800, 600);
+
+    // Centrer la fenêtre
+    QScreen *screen = QGuiApplication::primaryScreen();
+    if (screen) {
+        QRect screenGeometry = screen->availableGeometry();
+        int x = screenGeometry.x() + (screenGeometry.width() - this->width()) / 2;
+        int y = screenGeometry.y() + (screenGeometry.height() - this->height()) / 2;
+        this->move(x, y);
+    }
+
+    // Palette sombre et autres initialisations
+    QPalette palette;
+    palette.setColor(QPalette::Window, QColor("#1e1e2f"));
+    palette.setColor(QPalette::WindowText, Qt::white);
+    palette.setColor(QPalette::Base, QColor("#2c3e50"));
+    palette.setColor(QPalette::AlternateBase, QColor("#34495e"));
+    palette.setColor(QPalette::ToolTipBase, Qt::white);
+    palette.setColor(QPalette::ToolTipText, Qt::white);
+    palette.setColor(QPalette::Text, Qt::white);
+    palette.setColor(QPalette::Button, QColor("#2c3e50"));
+    palette.setColor(QPalette::ButtonText, Qt::white);
+    palette.setColor(QPalette::BrightText, Qt::red);
+    palette.setColor(QPalette::Highlight, QColor("#3498db"));
+    palette.setColor(QPalette::HighlightedText, Qt::white);
+    qApp->setPalette(palette);
 }
 
 MainWindow::~MainWindow() {
@@ -49,13 +80,12 @@ void MainWindow::AffichageGPS(){
 
     gps = new QWebEngineView(this);
     gps->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    gps->setMinimumWidth(400);  // ou plus, selon ta fenêtre
-
+    //gps->setMinimumWidth(400);  // ou plus, selon ta fenêtre
+    gps->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     gps->settings()->setAttribute(QWebEngineSettings::LocalContentCanAccessRemoteUrls, true);
     gps->settings()->setAttribute(QWebEngineSettings::LocalContentCanAccessFileUrls, true);
-
-    // Charger la carte GPS
-    //gps->setUrl(QUrl("ressources/map.html"));
+    gps->setFixedSize(400,400); // si tu veux forcer la taille exacte
+       //gps->setUrl(QUrl("ressources/map.html"));
     QString path = QCoreApplication::applicationDirPath() + "/ressources/map.html";
     qDebug() << "Chemin complet vers la carte : " << path;
     if (!QFile::exists(path)) {
@@ -73,7 +103,7 @@ void MainWindow::AffichageCAM(){
     webView = new QWebEngineView(this);
 
     // Charger le flux vidéo
-    webView->setUrl(QUrl("http://10.42.0.77:8080/stream_viewer?topic=/yolo_detections"));
+    webView->setUrl(QUrl("http://192.168.1.231:8080/stream_viewer?topic=/yolo_detections"));
     // Ajout des WebViews dans l'interface
     ui->layout_cam->addWidget(webView);
 
@@ -85,14 +115,23 @@ void MainWindow::AffichageCAM(){
                 document.body.style.overflow = 'hidden';
             )");
             webView->page()->runJavaScript(R"(
-                let video = document.querySelector("video");
-                if (video) {
-                    video.style.position = "fixed";
-                    video.style.top = "0";
-                    video.style.left = "0";
-                    video.style.width = "100vw";
-                    video.style.height = "100vh";
-                    video.style.objectFit = "cover";
+   // Supprimer tous les <h1> de la page
+    let headers = document.querySelectorAll("h1");
+    headers.forEach(h => h.remove());
+
+    // Masquer les débordements
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+
+    // Adapter la vidéo plein écran
+    let video = document.querySelector("video");
+    if (video) {
+        video.style.position = "fixed";
+        video.style.top = "0";
+        video.style.left = "0";
+        video.style.width = "100vw";
+        video.style.height = "100vh";
+        video.style.objectFit = "cover";
                 }
             )");
         } else {
@@ -106,82 +145,92 @@ void MainWindow::AffichageCAM(){
 void MainWindow::WatchDog(){
     if (serial.isOpen()) {
         // Création du timer s'il n'existe pas
+        static int time_value = 0;
         if (!timerWatchdog) {
             timerWatchdog = new QTimer(this);
+
             connect(timerWatchdog, &QTimer::timeout, this, [this]() {
-                QString command = QString("AT+SEND=1,1,0,0\n");
+                QString command = QString("AT+SEND=1,W%1,0,0\n").arg(time_value);
+                time_value = time_value + 1;
                 serial.write(command.toUtf8());
                 ui->tb_transmet->append("WatchDog envoyé : " + command);
             });
         }
-
-        // Démarrage à 50 ms
-        timerWatchdog->start(500);
-        ui->tb_transmet->append("WatchDog activé (toutes les 500ms).");
     } else {
         qCritical() << "Erreur: Port série non ouvert.";
     }
 }
 
 
-void MainWindow::on_pb_mode_manuel_clicked()
+void MainWindow::on_pb_mode_manuel_toggled(bool checked)
 {
-    QString command1 = QString("AT+SEND=1,dmxMyMf");
-    serial.write(command1.toUtf8());
-    ui->tb_transmet->append("Commande envoyée : " + command1);
+    if(checked){
+        timerWatchdog->stop();
+        ui->pb_Urgence_Stop->setChecked(false);
+        QString command1 = QString("AT+SEND=1,dmxMyMf");
+        serial.write(command1.toUtf8());
+        ui->tb_transmet->append("Commande envoyée : " + command1);
 
-    // Initialise SDL avec uniquement le sous-système contrôleur de jeu
-    if (SDL_Init(SDL_INIT_GAMECONTROLLER) < 0) {
-        qCritical() << "Erreur SDL_Init:" << SDL_GetError();
-        return;
-    }
+        // Initialise SDL avec uniquement le sous-système contrôleur de jeu
+        if (SDL_Init(SDL_INIT_GAMECONTROLLER) < 0) {
+            qCritical() << "Erreur SDL_Init:" << SDL_GetError();
+            return;
+        }
 
-    // Vérifie s'il y a au moins une manette connectée et compatible
-    if (SDL_NumJoysticks() > 0 && SDL_IsGameController(0)) {
-        controller = SDL_GameControllerOpen(0);
-        if (!controller) {
-            ui->tb_transmet->append("Impossible d'ouvrir le contrôleur SDL.");
+        // Vérifie s'il y a au moins une manette connectée et compatible
+        if (SDL_NumJoysticks() > 0 && SDL_IsGameController(0)) {
+            controller = SDL_GameControllerOpen(0);
+            if (!controller) {
+                ui->tb_transmet->append("Impossible d'ouvrir le contrôleur SDL.");
+                cleanupSDL();
+                return;
+            }
+        } else {
+            ui->tb_transmet->append("Aucune manette détectée.");
             cleanupSDL();
             return;
         }
-    } else {
-        ui->tb_transmet->append("Aucune manette détectée.");
-        cleanupSDL();
-        return;
-    }
 
-    // Création et gestion du timer pour lire les entrées toutes les 500ms
-    timerjoystick = new QTimer(this);
-    connect(timerjoystick, &QTimer::timeout, this, [this]() {
-        SDL_PumpEvents(); // Met à jour l'état du joystick
+        // Création et gestion du timer pour lire les entrées toutes les 500ms
+        timerjoystick = new QTimer(this);
+        connect(timerjoystick, &QTimer::timeout, this, [this]() {
+            SDL_PumpEvents(); // Met à jour l'état du joystick
 
-        if (controller) {
-            int y = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_LEFTX);
-            int x = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_LEFTY);
+            if (controller) {
+                int y = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_LEFTX);
+                int x = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_LEFTY);
 
-            // Conversion de -32768 à 32767 vers -255 à 255
-            int converted_X = std::clamp<int>(static_cast<int>((x / 32768.0) * 255.0), -255, 255);
-            int converted_Y = std::clamp<int>(static_cast<int>((y / 32768.0) * 255.0), -255, 255);
+                // Conversion de -32768 à 32767 vers -255 à 255
+                int converted_X = std::clamp<int>(static_cast<int>((x / 32768.0) * 255.0), -255, 255);
+                int converted_Y = std::clamp<int>(static_cast<int>((y / 32768.0) * 255.0), -255, 255);
 
-            QString xi = QString("dmx%1y").arg(-converted_X);
-            QString yi = QString("%1f").arg(converted_Y);
-            QPushButton *modeUrgence = findChild<QPushButton*>("pb_Urgence_Stop");
-                // Vérifie si le mode urgence est activé
-                if (modeUrgence && modeUrgence->isChecked()) {
-                    ui->tb_transmet->append("Arret du drone en mode URGENCE !");
-                } else {
-                    //QString command = QString("AT+SEND=1,%1%2,0,3\n").arg(xi).arg((yi));
-                    QString command = QString("AT+SEND=1,125,0,3\n");
-                    serial.write(command.toUtf8());
-                    ui->tb_transmet->append("Commande envoyée : " + command);
-                }
+                QString xi = QString("dmx%1y").arg(-converted_X);
+                QString yi = QString("%1f").arg(converted_Y);
+                QString command = QString("AT+SEND=1,%1%2,0,3\n").arg(xi).arg((yi));
+                //QString command = QString("AT+SEND=1,125,0,3\n");
+                serial.write(command.toUtf8());
+                ui->tb_transmet->append("Commande envoyée : " + command);
+
+
             }
-    });
 
-    timerjoystick->start(100); // Lecture toutes les 50 ms
+        });
 
+        timerjoystick->start(500); // Lecture toutes les 50 ms
+    }
+    if(!checked) {
+        QString command = QString("AT+SEND=1,dmx0y0f,0,3\n");
+        QString command2 = QString("AT+SEND=1,dmx0y0f,0,3\n");
+        serial.write(command.toUtf8());
+        serial.write(command2.toUtf8());
+        ui->tb_transmet->append("Commande envoyée : " + command);
+        ui->tb_transmet->append("Commande envoyée : " + command2);
+        timerWatchdog->start(1000);
+        timerjoystick->stop();
+    }
     // Assurer le nettoyage de SDL lors de la fermeture de l'application
     connect(qApp, &QCoreApplication::aboutToQuit, this, &MainWindow::cleanupSDL);
+
 }
 
 void MainWindow::cleanupSDL()
@@ -204,13 +253,54 @@ void MainWindow::cleanupSDL()
 void MainWindow::on_pb_Urgence_Stop_toggled(bool checked)
 {
     if (checked) {
+        QString command = QString("AT+SEND=1,dmx0y0f,0,3\n");
+        //QString command = QString("AT+SEND=1,125,0,3\n");
+        serial.write(command.toUtf8());
+        ui->tb_transmet->append("Commande envoyée : " + command);
         ui->tb_transmet->append("Arrêt d'urgence activé !");
         if (timerjoystick) timerjoystick->stop(); // sécurité
-        if (timerWatchdog) timerWatchdog->stop(); // évite le crash
-    } else {
-        ui->tb_transmet->append("Arrêt d'urgence désactivé.");
-        if (timerjoystick) timerjoystick->start(500);
-        if (timerWatchdog) timerWatchdog->start(500);
-        // Réactiver les commandes du joystick si l'urgence est désactivée
+        ui->pb_mode_manuel->setChecked(false);    }
+    timerWatchdog->start(1000);
+}
+
+
+void MainWindow::ReadSerial() {
+    static QByteArray buffer;
+
+    buffer.append(serial.readAll());
+
+    if (buffer.contains('\n')) {
+        QList<QByteArray> lines = buffer.split('\n');
+        for (int i = 0; i < lines.size() - 1; ++i) {
+            QString line = QString::fromUtf8(lines[i].trimmed());
+            if (!line.isEmpty()) {
+                QRegularExpression regex("DTL([-+]?\\d*\\.?\\d+)l([-+]?\\d*\\.?\\d+)f");
+                QRegularExpressionMatch match = regex.match(line);
+                if (match.hasMatch()) {
+                    QString longitude = match.captured(1);
+                    QString latitude = match.captured(2);
+
+                    // Exemple : afficher dans la console et dans l'IHM
+                    qDebug() << "Longitude :" << longitude << ", Latitude :" << latitude;
+                    ui->tb_receive->append("Longitude : " + longitude + ", Latitude : " + latitude);
+                } else {
+                    ui->tb_receive->append("Trame reçue (non GPS) : " + line);
+                }
+            }
+        }
+
+        buffer = lines.last();
     }
 }
+
+
+void MainWindow::on_bt_debug_toggled(bool arg1)
+{
+    // Affiche ou cache les éléments en fonction de l’état de l'action
+    ui->tb_transmet->setVisible(arg1);
+    ui->tb_receive->setVisible(arg1);
+    ui->bt_debug->setText(arg1 ? "Masquer Debug" : "Afficher Debug");
+}
+
+
+

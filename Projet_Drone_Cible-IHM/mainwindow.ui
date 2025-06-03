@@ -14,56 +14,99 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="tabletTracking">
+    <bool>false</bool>
+   </property>
    <layout class="QGridLayout" name="gridLayout">
-    <item row="4" column="2">
-     <layout class="QVBoxLayout" name="verticalLayout">
-      <item>
-       <widget class="QSlider" name="horizontalSlider">
-        <property name="orientation">
-         <enum>Qt::Orientation::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="5" column="2">
-     <widget class="QPushButton" name="pb_mode_manuel">
-      <property name="text">
-       <string>mode manuel</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="0">
-     <widget class="QLabel" name="label_Attaque">
-      <property name="text">
-       <string>Attaque Mode</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="3">
-     <widget class="QTextEdit" name="tb_transmet"/>
-    </item>
-    <item row="3" column="0">
+    <item row="4" column="0">
      <widget class="QPushButton" name="pb_Straight_Line">
       <property name="text">
        <string>Ligne droite</string>
       </property>
      </widget>
     </item>
-    <item row="1" column="2">
-     <layout class="QGridLayout" name="layout_cam"/>
+    <item row="1" column="4">
+     <widget class="QTextEdit" name="tb_receive">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>200</width>
+        <height>300</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>200</width>
+        <height>16777215</height>
+       </size>
+      </property>
+     </widget>
     </item>
-    <item row="4" column="0">
+    <item row="6" column="0">
      <widget class="QPushButton" name="pb_Zig_Zag">
       <property name="text">
        <string>Serpentin</string>
       </property>
      </widget>
     </item>
-    <item row="3" column="2">
-     <widget class="QLCDNumber" name="lcd_speed_num"/>
+    <item row="1" column="3">
+     <widget class="QTextEdit" name="tb_transmet">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>50</width>
+        <height>300</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>200</width>
+        <height>16777215</height>
+       </size>
+      </property>
+     </widget>
     </item>
-    <item row="2" column="2">
+    <item row="1" column="2">
+     <layout class="QGridLayout" name="layout_cam" columnstretch="0">
+      <property name="sizeConstraint">
+       <enum>QLayout::SizeConstraint::SetFixedSize</enum>
+      </property>
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+     </layout>
+    </item>
+    <item row="1" column="0">
+     <layout class="QHBoxLayout" name="layout_gps">
+      <property name="sizeConstraint">
+       <enum>QLayout::SizeConstraint::SetMaximumSize</enum>
+      </property>
+     </layout>
+    </item>
+    <item row="6" column="2">
+     <widget class="QPushButton" name="pb_mode_manuel">
+      <property name="text">
+       <string>mode manuel</string>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="2">
      <widget class="QPushButton" name="pb_Urgence_Stop">
       <property name="text">
        <string>Arrêt d'urgence</string>
@@ -73,8 +116,24 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="0" colspan="2">
-     <layout class="QHBoxLayout" name="layout_gps"/>
+    <item row="2" column="0">
+     <widget class="QLabel" name="label_Attaque">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>10</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>15</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>Attaque Mode</string>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -87,26 +146,18 @@
      <height>22</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menumode">
+   <widget class="QMenu" name="debug_2">
     <property name="title">
-     <string>mode </string>
+     <string>debug</string>
     </property>
-    <addaction name="actionmode_autonome"/>
-    <addaction name="actionmode_leure"/>
-    <addaction name="actionmode_attaque"/>
-   </widget>
-   <widget class="QMenu" name="menulogs">
-    <property name="title">
-     <string>logs</string>
-    </property>
+    <addaction name="bt_debug"/>
    </widget>
    <widget class="QMenu" name="menuimporter_maps">
     <property name="title">
      <string>importer maps</string>
     </property>
    </widget>
-   <addaction name="menumode"/>
-   <addaction name="menulogs"/>
+   <addaction name="debug_2"/>
    <addaction name="menuimporter_maps"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -143,12 +194,12 @@
     <string>mode_autonome</string>
    </property>
   </action>
-  <action name="actionmode_leure">
+  <action name="action">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>mode_leure</string>
+    <string>mode_manuel</string>
    </property>
   </action>
   <action name="actionmode_attaque">
@@ -157,6 +208,17 @@
    </property>
    <property name="text">
     <string>mode_attaque</string>
+   </property>
+  </action>
+  <action name="bt_debug">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>afficher debug</string>
    </property>
   </action>
  </widget>

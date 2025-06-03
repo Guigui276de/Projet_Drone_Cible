@@ -1,8 +1,0 @@
-{
-"type": "FeatureCollection",
-"name": "test_Triangle",
-"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
-"features": [
-{ "type": "Feature", "properties": { "fid": 0, "Nom": "triangle", "id": null, "type": "test" }, "geometry": { "type": "LineString", "coordinates": [ [ -4.499519910045203, 48.373047365407174 ], [ -4.49178276030392, 48.369344152174044 ], [ -4.489908543906963, 48.37502655859263 ], [ -4.499616023706585, 48.373047365407174 ] ] } }
-]
-}

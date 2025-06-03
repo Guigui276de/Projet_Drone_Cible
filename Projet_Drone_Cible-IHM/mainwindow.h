@@ -13,6 +13,8 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QWebChannel>
+#include <QRegularExpression>
+#include <QSplashScreen>
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
@@ -34,12 +36,15 @@ public:
     void AffichageCAM();
     QSerialPort serial;
     void cleanupSDL();
-
+    void ReadSerial();
 public slots: // fonction publique cliquable
     void on_pb_Urgence_Stop_toggled(bool checked);
-    void on_pb_mode_manuel_clicked();
+    void on_bt_debug_toggled(bool arg1);
+    void on_pb_mode_manuel_toggled(bool checked);
 
 private:
+
+    QSplashScreen *splash = new QSplashScreen(QPixmap("image/logo.png").scaled(500, 300, Qt::KeepAspectRatio, Qt::SmoothTransformation));
     Ui::MainWindow *ui;
     SDL_GameController *controller = nullptr;  // Initialisé à nullptr pour éviter les erreurs
     QJsonObject joystickData;
@@ -47,6 +52,8 @@ private:
     QTimer *timerWatchdog = nullptr; // Timer pour le watchdog
     QWebEngineView *webView;
     QWebEngineView *gps;
+    QRegularExpression regex;
+
 
 };
 
